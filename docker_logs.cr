@@ -82,14 +82,14 @@ end
 
 def process_file(file_to_process, lines_to_process, db, table_name)
 	counter=0
-	start_cycle=Time.now.epoch_f
+	start_cycle=Time.now.to_unix_f
 	File.each_line(file_to_process.to_s) do |line|
 		counter=counter+1
 		if (counter % 1000) == 0
-			end_cycle=Time.now.epoch_f
+			end_cycle=Time.now.to_unix_f
 			cycle_time=end_cycle-start_cycle
 			puts "Processing line #{counter} of #{lines_to_process} (#{((100/lines_to_process.to_f)*counter).round(1)}%) - Seconds: #{cycle_time.round(2)}"
-			start_cycle=Time.now.epoch_f
+			start_cycle=Time.now.to_unix_f
 		end
 		parsed_json=JSON.parse(line)
 		time = parsed_json["time"]
