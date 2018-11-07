@@ -1,0 +1,6 @@
+name: docker_logs
+version: 0.0.1
+
+dependencies:
+  pg:
+    github: will/crystal-pg
