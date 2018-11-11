@@ -3,7 +3,7 @@ A short script written in Crystal lang that will incrementally upload all of you
 
 # To build on Ubuntu 18
 
-* [Make sure you have Crystal installed](https://crystal-lang.org/docs/installation/on_debian_and_ubuntu.html)
+* [Make sure you have Crystal 0.27 installed](https://crystal-lang.org/docs/installation/on_debian_and_ubuntu.html)
 * Make sure [logtail2](https://packages.ubuntu.com/cosmic/admin/logtail) is installed - on Ubuntu `apt get install logtail2`
 * Clone the repo: `git clone https://github.com/weirdbricks/docker_logs.git`
 * Edit the `settings` file to point to your Postgres database
