@@ -6,7 +6,7 @@ A short script written in Crystal lang that will incrementally upload all of you
 * [Make sure you have Crystal installed](https://crystal-lang.org/docs/installation/on_debian_and_ubuntu.html)
 * Make sure [logtail2](https://packages.ubuntu.com/cosmic/admin/logtail) is installed - on Ubuntu `apt get install logtail2`
 * Clone the repo: `git clone https://github.com/weirdbricks/docker_logs.git`
-* Optional - edit the `docker_logs.cr` and change lines 102-106 to point to your Postgres database
+* Edit the `settings` file to point to your Postgres database
 * Get shards (Crystal lang dependencies): `shards install`
 * Build: `crystal build --static --release docker_logs.cr`
 * Run: `./docker_logs`
