@@ -2,80 +2,49 @@ require "db"
 require "pg" #postgres
 require "json"
 require "poncho/parser" #reads .env files
+require "./docker_logs_startup_checks.cr"
+
+# include functions from the ./docker_logs_startup_checks.cr file
+include DockerLogsStartupChecks
 
 OK   = "[  OK  ]"
 INFO = "[ INFO ]"
 FAIL = "[ FAIL ]"
 SETTINGS_FILE = "./settings"
 
-puts "#{INFO} - Check if we can get the \"#{SETTINGS_FILE}\" file..."
-if File.file?(SETTINGS_FILE) 
-	puts "#{OK} - The file \"#{SETTINGS_FILE}\" exists"
-else
-	puts "#{FAIL} - Sorry, I couldn't find the file \"#{SETTINGS_FILE}\"."
-	exit 1
-end
+# the check_if_settings_file_exists function is in ./docker_logs_startup_checks.cr
+check_if_settings_file_exists(SETTINGS_FILE)
 
 puts "#{INFO} - Parsing \"#{SETTINGS_FILE}\"..."
 PG_SETTINGS = Poncho.from_file SETTINGS_FILE
 
-def check_for_shell_command(some_command)
-	puts "#{INFO} - Check if the \"#{some_command}\" command exists..."
-	begin
-		Process.run(some_command)
-		puts "#{OK} - the \"#{some_command}\" command has been found"
-	rescue
-		puts "#{FAIL} - Sorry the \"#{some_command}\" command could not be found"
-		exit 1
-	end
-end
-
+# the check_for_shell_command function is in ./docker_logs_startup_checks.cr
 check_for_shell_command("docker")
 check_for_shell_command("logtail2")
 
-puts "#{INFO} - Check if we can get the hostname..."
-HOSTNAME=System.hostname
-if HOSTNAME.empty? 
-	puts "#{FAIL} - Sorry, I cannot get the hostname :("
-	exit 1
-else
-	puts "#{OK} - I got the hostname: \"#{HOSTNAME}\""
-end
+# the get_hostname function is in ./docker_logs_startup_checks.cr
+HOSTNAME = get_hostname
 
-puts "#{INFO} - Check if docker is running..."
-begin
-	args = ["info"]
-	# stolen from https://stackoverflow.com/a/47051672
-        output = IO::Memory.new
-	Process.run("docker", args: args, output: output, error: output)
-	puts "#{OK} - the docker service is running"
-	# take the output from memory, cast it to a string, strip out
-	# any whitespace and then split on a new line
-	docker_info = output.to_s.strip.split("\n")
-	docker_root_dir=""
-	docker_info.each do |line|
-		if line.includes?("Docker Root Dir:")
-			docker_root_dir=line.split("Docker Root Dir:")[1].strip
-		end
-	end
-rescue
-	puts "#{FAIL} - Sorry the docker service is not running"
-	exit 1
-end
+# the check_if_the_docker_service_is_running function is in ./docker_logs_startup_checks.cr
+check_if_the_docker_service_is_running
+
+# the get_docker_root_dir function is in ./docker_logs_startup_checks.cr
+DOCKER_ROOT_DIR=get_docker_root_dir
 
 # before we go any further let's make sure that we did get a value for the docker root directory
 puts "#{INFO} - Checking if we got the docker root directory..."
-if docker_root_dir.empty?
+if DOCKER_ROOT_DIR.empty?
 	puts "#{FAIL} - Sorry, I couldn't get the docker root directory"
 	exit 1
 else
-	puts "#{OK} - I got the docker root directory: \"#{docker_root_dir}\""
+	puts "#{OK} - I got the docker root directory: \"#{DOCKER_ROOT_DIR}\""
 end
 
 puts "#{INFO} - Get list of containers..."
 containers=`docker ps --all --format "{{.ID}} {{.Names}}"`.strip.split("\n")
 if $?.exit_status != 0
 	puts "#{FAIL} - Sorry, something went wrong while trying to get the container listing"
+	exit 1
 else
 	puts "#{OK} - Got #{containers.size} containers."
 end
@@ -156,7 +125,7 @@ containers.each do |container|
 		db.exec "create table #{table_name} (name varchar(2000), ts timestamptz)"
 	end
 
-	log_filename="#{docker_root_dir}/containers/#{full_id}/#{full_id}-json.log"
+	log_filename="#{DOCKER_ROOT_DIR}/containers/#{full_id}/#{full_id}-json.log"
 	if File.file?(log_filename)
 		puts "#{INFO} - Found the file \"#{log_filename}\""
 		results=get_new_lines_from_file(log_filename,name)
