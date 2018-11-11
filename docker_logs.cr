@@ -1,10 +1,23 @@
 require "db"
 require "pg" #postgres
 require "json"
+require "poncho/parser" #reads .env files
 
 OK   = "[  OK  ]"
 INFO = "[ INFO ]"
 FAIL = "[ FAIL ]"
+SETTINGS_FILE = "./settings"
+
+puts "#{INFO} - Check if we can get the \"#{SETTINGS_FILE}\" file..."
+if File.file?(SETTINGS_FILE) 
+	puts "#{OK} - The file \"#{SETTINGS_FILE}\" exists"
+else
+	puts "#{FAIL} - Sorry, I couldn't find the file \"#{SETTINGS_FILE}\"."
+	exit 1
+end
+
+puts "#{INFO} - Parsing \"#{SETTINGS_FILE}\"..."
+PG_SETTINGS = Poncho.from_file SETTINGS_FILE
 
 def check_for_shell_command(some_command)
 	puts "#{INFO} - Check if the \"#{some_command}\" command exists..."
@@ -99,11 +112,12 @@ def process_file(file_to_process, lines_to_process, db, table_name)
 end
 
 puts "#{INFO} - Check that you can connect to postgres..."
-PG_USERNAME="postgres"
-PG_PASSWORD="mysecretpassword"
-PG_DATABASE="lampros"
-PG_HOSTNAME="192.168.1.16"
-PG_PORT=5432
+PG_USERNAME = PG_SETTINGS["PG_USERNAME"]
+PG_PASSWORD = PG_SETTINGS["PG_PASSWORD"]
+PG_DATABASE = PG_SETTINGS["PG_DATABASE"]
+PG_HOSTNAME = PG_SETTINGS["PG_HOSTNAME"]
+PG_PORT     = PG_SETTINGS["PG_PORT"].to_i
+
 begin
 	db = DB.open "postgres://#{PG_USERNAME}:#{PG_PASSWORD}@#{PG_HOSTNAME}:#{PG_PORT}/#{PG_DATABASE}"
 rescue

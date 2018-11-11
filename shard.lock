@@ -2,9 +2,13 @@ version: 1.0
 shards:
   db:
     github: crystal-lang/crystal-db
-    version: 0.5.0
+    version: 0.5.1
 
   pg:
     github: will/crystal-pg
     version: 0.15.0
+
+  poncho:
+    github: icyleaf/poncho
+    version: 0.3.0
 
