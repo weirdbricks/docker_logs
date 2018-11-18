@@ -5,6 +5,7 @@ require "toml" #reads our configuration files
 require "./startup_checks.cr"
 require "./docker_logs_startup_checks.cr"
 require "./functions_docker.cr"
+require "./functions_database.cr"
 
 OK   = "[  OK  ]"
 INFO = "[ INFO ]"
@@ -23,6 +24,9 @@ include DockerLogsStartupChecks
 
 # include functions from the ./functions_docker.cr file
 include FunctionsDocker
+
+# include functions from the ./functions_database.cr file
+include FunctionsDatabase
 
 ##########################################################################################
 # Startup checks
@@ -110,33 +114,13 @@ def process_file(file_to_process, lines_to_process, db, table_name, log_type)
 	end
 end
 
-puts "#{INFO} - Check that you can connect to postgres..."
-PG_USERNAME = PG_SETTINGS["PG_USERNAME"]
-PG_PASSWORD = PG_SETTINGS["PG_PASSWORD"]
-PG_DATABASE = PG_SETTINGS["PG_DATABASE"]
-PG_HOSTNAME = PG_SETTINGS["PG_HOSTNAME"]
-PG_PORT     = PG_SETTINGS["PG_PORT"]
+# connect to the database
+# the connect_to_database function is in ./functions_database.cr
+db = connect_to_database(PG_SETTINGS)
 
-begin
-	db = DB.open "postgres://#{PG_USERNAME}:#{PG_PASSWORD}@#{PG_HOSTNAME}:#{PG_PORT}/#{PG_DATABASE}"
-rescue
-	puts "#{FAIL} - Sorry, Cannot connect to Postgres"
-	exit 1
-end
-
-puts "#{OK} - Successful connection to Postgres"
-
-puts "#{INFO} - Getting the list of tables in the \"#{PG_DATABASE}\" database..."
-existing_tables = db.query_all "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'", as: String 
-
-if existing_tables.size == 0
-	puts "#{INFO} - No tables were found - this is probably the first run :)"
-else
-	puts "#{INFO} - #{existing_tables.size} tables were found - these are:"
-	existing_tables.each do |table|
-		puts "#{INFO} - #{table}"
-	end
-end
+pg_database = PG_SETTINGS["PG_DATABASE"]
+# the get_list_of_existing_tables function is in ./functions_database.cr
+existing_tables = get_list_of_existing_tables(db, pg_database)
 
 # we run this part only if the PROCESS_DOCKER_LOGS option
 # in the settings file is set to true
