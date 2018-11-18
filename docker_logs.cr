@@ -4,6 +4,7 @@ require "json"
 require "toml" #reads our configuration files
 require "./startup_checks.cr"
 require "./docker_logs_startup_checks.cr"
+require "./functions_docker.cr"
 
 OK   = "[  OK  ]"
 INFO = "[ INFO ]"
@@ -19,6 +20,9 @@ include StartupChecks
 
 # include functions from the ./docker_logs_startup_checks.cr file
 include DockerLogsStartupChecks
+
+# include functions from the ./functions_docker.cr file
+include FunctionsDocker
 
 ##########################################################################################
 # Startup checks
@@ -138,15 +142,8 @@ end
 # in the settings file is set to true
 if SETTINGS["PROCESS_DOCKER_LOGS"] == true 
 
-	puts "#{INFO} - Get list of containers..."
-	containers=`docker ps --all --format "{{.ID}} {{.Names}}"`.strip.split("\n")
-	if $?.exit_status != 0
-	        puts "#{FAIL} - Sorry, something went wrong while trying to get the container listing"
-	        exit 1
-	else
-	        puts "#{OK} - Got #{containers.size} containers."
-	end
-
+	# the get_container_list function is in ./functions_docker.cr
+	containers = get_container_list
 
 	puts "#{INFO} - Getting the container logs..."
 	containers.each do |container|
