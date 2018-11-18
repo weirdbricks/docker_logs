@@ -120,7 +120,7 @@ rescue
 	exit 1
 end
 
-puts "#{OK} - Successfull connection to Postgres"
+puts "#{OK} - Successful connection to Postgres"
 
 puts "#{INFO} - Getting the list of tables in the \"#{PG_DATABASE}\" database..."
 existing_tables = db.query_all "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'", as: String 
