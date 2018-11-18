@@ -92,7 +92,7 @@ end
 
 # this function takes the temporary filename created by logtail2 and 
 # processes it line by line, adding lines to the database in a table
-def process_file(file_to_process, lines_to_process, db, table_name)
+def process_file(file_to_process, lines_to_process, db, table_name, log_type)
 	counter=0
 	start_cycle=Time.now.to_unix_f
 	File.each_line(file_to_process.to_s) do |line|
@@ -159,7 +159,7 @@ if SETTINGS["PROCESS_DOCKER_LOGS"] == true
 			puts "#{OK} - The table \"#{table_name}\" already exists"
 		else
 			puts "#{INFO} - Creating the table \"#{table_name}\"..."
-			db.exec "create table #{table_name} (name varchar(2000), ts timestamptz)"
+			db.exec "create table #{table_name} (name varchar(10000), ts timestamptz)"
 		end
 
 		log_filename="#{docker_Root_Dir}/containers/#{full_id}/#{full_id}-json.log"
@@ -170,11 +170,19 @@ if SETTINGS["PROCESS_DOCKER_LOGS"] == true
 
 			file_to_process  = results[0]
 			lines_to_process = results[1]
-			process_file(file_to_process,lines_to_process,db,table_name)
+			log_type="docker"
+			process_file(file_to_process,lines_to_process,db,table_name,log_type)
 			
 		else
 			puts "#{FAIL} - Sorry I could not find the file \"#{log_filename}\""
 		end
 	end
 
+end
+
+if LOG_FILES.size > 0
+	LOG_FILES.each do |name,filename|	
+		log_type="syslog"
+		puts name,filename
+	end
 end
