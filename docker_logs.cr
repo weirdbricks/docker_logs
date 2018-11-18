@@ -60,14 +60,8 @@ if SETTINGS["PROCESS_DOCKER_LOGS"] == true
 	# the get_docker_root_dir function is in ./docker_logs_startup_checks.cr
 	docker_Root_Dir=get_docker_root_dir
 
-	# before we go any further let's make sure that we did get a value for the docker root directory
-	puts "#{INFO} - Checking if we got the docker root directory..."
-	if docker_Root_Dir.empty?
-		puts "#{FAIL} - Sorry, I couldn't get the docker root directory"
-		exit 1
-	else
-		puts "#{OK} - I got the docker root directory: \"#{docker_Root_Dir}\""
-	end
+	# the check_docker_root_dir function is in ./docker_logs_startup_checks.cr
+	check_docker_root_dir(docker_Root_Dir)
 
 else
 	puts "#{INFO} - The \"PROCESS_DOCKER_LOGS\" option is set to \"false\" so I will not process any docker logs"

@@ -25,4 +25,26 @@ module DockerLogsStartupChecks
 		return docker_root_dir
 	end
 
+	# takes the docker root directory as it's argument
+	# * checks that the directory is not an empty string
+	# * checks that the directory exists
+	def check_docker_root_dir(docker_Root_Dir)
+		# before we go any further let's make sure that we did get a value for the docker root directory
+	        puts "#{INFO} - Checking if we got the docker root directory..."
+	        if docker_Root_Dir.empty?
+	                puts "#{FAIL} - Sorry, I couldn't get the docker root directory"
+	                exit 1
+	        else
+	                puts "#{OK} - I got the docker root directory: \"#{docker_Root_Dir}\""
+	        end
+
+		if File.directory?(docker_Root_Dir)
+			puts "#{OK} - the directory: \"#{docker_Root_Dir}\" exists"
+		else
+			puts "#{FAIL} - Sorry, it doesn't look like the directory: \"#{docker_Root_Dir}\" exists"
+			exit 1
+		end
+	end
+
+
 end
