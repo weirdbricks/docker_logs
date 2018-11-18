@@ -1,5 +1,0 @@
-PG_USERNAME=postgres
-PG_PASSWORD=mysecretpassword
-PG_DATABASE=lampros
-PG_HOSTNAME=172.17.0.1
-PG_PORT=5432
