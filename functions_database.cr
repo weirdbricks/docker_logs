@@ -36,4 +36,18 @@ module FunctionsDatabase
 		return existing_tables
 	end
 
+	# create the table in the database if it doesn't already exist
+	# needs the following parameters
+	# the db object
+	# the table name
+	# the array of existign tables
+	def create_table_if_not_there(db, table_name, existing_tables)
+		if existing_tables.includes?(table_name)
+                        puts "#{OK} - The table \"#{table_name}\" already exists"
+                else
+                        puts "#{INFO} - Creating the table \"#{table_name}\"..."
+                        db.exec "create table #{table_name} (name varchar(10000), ts timestamptz)"
+                end
+	end
+
 end

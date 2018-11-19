@@ -133,12 +133,9 @@ if SETTINGS["PROCESS_DOCKER_LOGS"] == true
 		table_name = table_name.gsub('-', "_")
 		# and make sure it's downcased
 		table_name = table_name.downcase
-		if existing_tables.includes?(table_name)
-			puts "#{OK} - The table \"#{table_name}\" already exists"
-		else
-			puts "#{INFO} - Creating the table \"#{table_name}\"..."
-			db.exec "create table #{table_name} (name varchar(10000), ts timestamptz)"
-		end
+
+		# the create_table_if_not_there function is in ./functions_database.cr
+		create_table_if_not_there(db, table_name, existing_tables)
 
 		log_filename="#{docker_Root_Dir}/containers/#{full_id}/#{full_id}-json.log"
 		if File.file?(log_filename)
